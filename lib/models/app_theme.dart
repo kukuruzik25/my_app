@@ -1,11 +1,10 @@
 import 'package:flutter/cupertino.dart';
 
-enum AppThemeColor {pink, blue, purple, green, orange}
+enum AppThemeColor { pink, blue, purple, green, orange }
 
 class ThemeColors {
-
-  final Color primary; // цвет числа
-  final Color secondary; // цвет остального текста
+  final Color primary;
+  final Color secondary;
 
   const ThemeColors({required this.primary, required this.secondary});
 
@@ -13,8 +12,8 @@ class ThemeColors {
     switch (theme) {
       case AppThemeColor.pink:
         return const ThemeColors(
-          primary: Color(0xFFC2185B), // тёмно-розовый
-          secondary: Color(0xFFF48FB1), // светло-розовый
+          primary: Color(0xFFC2185B),
+          secondary: Color(0xFFF48FB1),
         );
       case AppThemeColor.blue:
         return const ThemeColors(
