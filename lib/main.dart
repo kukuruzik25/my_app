@@ -10,7 +10,6 @@ void main() {
 }
 
 class MyApp extends StatefulWidget {
-
   const MyApp({super.key});
 
   @override
@@ -18,7 +17,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-
   final StorageService _storage = StorageService();
   AppThemeColor _theme = AppThemeColor.pink;
   DisplayFormat _format = DisplayFormat.days;
@@ -97,7 +95,6 @@ class _MyAppState extends State<MyApp> {
 }
 
 class _FloatingTabBar extends StatelessWidget {
-
   final int currentIndex;
   final Color accentColor;
   final ValueChanged<int> onTap;
@@ -115,7 +112,7 @@ class _FloatingTabBar extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(40, 0, 40, 28),
       decoration: BoxDecoration(
         color: CupertinoColors.white,
-        borderRadius: BorderRadius.circular(36), // половина высоты = капсула/овал
+        borderRadius: BorderRadius.circular(36),
         boxShadow: [
           BoxShadow(
             color: CupertinoColors.black.withOpacity(0.10),
@@ -151,7 +148,6 @@ class _FloatingTabBar extends StatelessWidget {
 }
 
 class _TabButton extends StatelessWidget {
-
   final IconData icon;
   final String label;
   final bool isSelected;
@@ -166,7 +162,7 @@ class _TabButton extends StatelessWidget {
     required this.onTap,
   });
 
- @override
+  @override
   Widget build(BuildContext context) {
     final color = isSelected ? accentColor : CupertinoColors.systemGrey;
     return GestureDetector(
