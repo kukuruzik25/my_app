@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:home_widget/home_widget.dart';
 import '../constants.dart';
 import '../models/app_theme.dart';
 import '../services/storage_service.dart';
-import 'package:home_widget/home_widget.dart';
 
 class CountdownScreen extends StatefulWidget {
   final AppThemeColor theme;
@@ -18,23 +18,67 @@ class CountdownScreen extends StatefulWidget {
 
 class _CountdownScreenState extends State<CountdownScreen> {
   Timer? _timer;
-
-  Future<void> _updateWidgetData(String bigNumber, String unitLabel) async {
-    await HomeWidget.saveWidgetData<String>('bigNumber', bigNumber);
-    await HomeWidget.saveWidgetData<String>('unitLabel', unitLabel);
-    await HomeWidget.updateWidget(iOSName: 'CountdownWidget'); // имя придумаем на Mac-этапе
-  }
+  Timer? _widgetUpdateTimer;
 
   @override
   void initState() {
     super.initState();
+    HomeWidget.setAppGroupId('group.com.my_app');
     _timer = Timer.periodic(const Duration(seconds: 1), (_) => setState(() {}));
+    _widgetUpdateTimer = Timer.periodic(const Duration(minutes: 1), (_) {
+      _refreshWidgetData();
+    });
+    _refreshWidgetData();
   }
 
   @override
   void dispose() {
     _timer?.cancel();
+    _widgetUpdateTimer?.cancel();
     super.dispose();
+  }
+
+  Future<void> _updateWidgetData(String bigNumber, String unitLabel) async {
+    await HomeWidget.saveWidgetData<String>('bigNumber', bigNumber);
+    await HomeWidget.saveWidgetData<String>('unitLabel', unitLabel);
+    await HomeWidget.updateWidget(iOSName: 'CountdownWidget');
+  }
+
+  void _refreshWidgetData() {
+    final now = DateTime.now();
+    final remaining = eventDate.difference(now);
+    String bigNumber;
+    String unitLabel;
+    switch (widget.format) {
+      case DisplayFormat.days:
+        bigNumber = remaining.inDays.toString();
+        unitLabel = 'дней осталось';
+        break;
+      case DisplayFormat.hours:
+        bigNumber = remaining.inHours.toString();
+        unitLabel = 'часов осталось';
+        break;
+      case DisplayFormat.weeksAndDays:
+        final weeks = remaining.inDays ~/ 7;
+        final days = remaining.inDays % 7;
+        bigNumber = '$weeks нед $days дн';
+        unitLabel = 'осталось';
+        break;
+    }
+    _updateWidgetData(bigNumber, unitLabel);
+  }
+
+  String _elapsedLabel(Duration elapsed) {
+    switch (widget.format) {
+      case DisplayFormat.days:
+        return 'Прошло дней: ${elapsed.inDays}';
+      case DisplayFormat.hours:
+        return 'Прошло часов: ${elapsed.inHours}';
+      case DisplayFormat.weeksAndDays:
+        final w = elapsed.inDays ~/ 7;
+        final d = elapsed.inDays % 7;
+        return 'Прошло: $w нед $d дн';
+    }
   }
 
   @override
@@ -66,7 +110,7 @@ class _CountdownScreenState extends State<CountdownScreen> {
         unitLabel = 'осталось';
         break;
     }
-    _updateWidgetData(bigNumber, unitLabel);
+
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.white,
       child: SafeArea(
@@ -111,7 +155,7 @@ class _CountdownScreenState extends State<CountdownScreen> {
                 style: GoogleFonts.inter(
                   fontSize: 13,
                   fontWeight: FontWeight.w400,
-                  color: colors.secondary.withValues(alpha: 0.7),
+                  color: colors.secondary.withOpacity(0.7),
                 ),
               ),
             ],
@@ -119,19 +163,6 @@ class _CountdownScreenState extends State<CountdownScreen> {
         ),
       ),
     );
-  }
-
-  String _elapsedLabel(Duration elapsed) {
-    switch (widget.format) {
-      case DisplayFormat.days:
-        return 'Прошло дней: ${elapsed.inDays}';
-      case DisplayFormat.hours:
-        return 'Прошло часов: ${elapsed.inHours}';
-      case DisplayFormat.weeksAndDays:
-        final w = elapsed.inDays ~/ 7;
-        final d = elapsed.inDays % 7;
-        return 'Прошло: $w нед $d дн';
-    }
   }
 }
 
