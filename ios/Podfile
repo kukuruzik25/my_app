@@ -1,30 +1,16 @@
-# Устанавливаем минимальную версию iOS 14
 platform :ios, '14.0'
-
-# Исправлено: используем require вместо import
-require File.expand_path(File.join('..', '..', '.flutter-plugins-dependencies'), __FILE__)
-
-plugin_pods = [
-  'home-widget'
-]
 
 target 'Runner' do
   use_frameworks!
   use_modular_headers!
 
-  # Стандартный метод интеграции плагинов Flutter
-  if respond_to?(:flutter_install_all_ios_pods)
-    flutter_install_all_ios_pods File.dirname(File.expand_path(__FILE__))
-  end
+  # Если Flutter передает плагины, CocoaPods их подтянет автоматически
 end
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|
-    if respond_to?(:flutter_additional_ios_build_settings)
-      flutter_additional_ios_build_settings(target)
-    end
     target.build_configurations.each do |config|
-      # Принудительно выставляем iOS 14 для всех зависимостей, чтобы home-widget не ругался
+      # Принудительно ставим iOS 14.0 абсолютно для всех модулей и плагинов
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
     end
   end
