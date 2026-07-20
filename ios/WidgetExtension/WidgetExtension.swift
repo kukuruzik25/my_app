@@ -3,26 +3,22 @@ import SwiftUI
 
 struct Provider: TimelineProvider {
     func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry(date: Date(), title: "Тока тока тока", count: "380", formatText: "часов осталось", colorHex: "#BA0D61")
+        SimpleEntry(date: Date(), title: "Тока тока тока", days: "16")
     }
 
     func getSnapshot(in context: Context, completion: SimpleEntry -> ()) {
-        let entry = SimpleEntry(date: Date(), title: "Тока тока тока", count: "380", formatText: "часов осталось", colorHex: "#BA0D61")
+        let entry = SimpleEntry(date: Date(), title: "Тока тока тока", days: "16")
         completion(entry)
     }
 
     func getTimeline(in context: Context, completion: Timeline<Entry> -> ()) {
-        // Читаем данные, которые Flutter сохранил в App Group
+        // Здесь home-widget будет передавать реальные данные из Flutter.
+        // Если данных пока нет, отобразятся дефолтные из UserDefaults.
         let sharedDefaults = UserDefaults(suiteName: "group.com.example.myCountdownApp")
-        
         let title = sharedDefaults?.string(forKey: "widget_title") ?? "Тока тока тока"
-        let count = sharedDefaults?.string(forKey: "widget_count") ?? "380"
-        let formatText = sharedDefaults?.string(forKey: "widget_format_text") ?? "часов осталось"
+        let days = sharedDefaults?.string(forKey: "widget_days") ?? "16"
         
-        // Получаем HEX-цвет из настроек (по дефолту малиновый #BA0D61)
-        let colorHex = sharedDefaults?.string(forKey: "widget_color_hex") ?? "#BA0D61"
-        
-        let entry = SimpleEntry(date: Date(), title: title, count: count, formatText: formatText, colorHex: colorHex)
+        let entry = SimpleEntry(date: Date(), title: title, days: days)
         let timeline = Timeline(entries: [entry], policy: .atEnd)
         completion(timeline)
     }
@@ -31,37 +27,37 @@ struct Provider: TimelineProvider {
 struct SimpleEntry: TimelineEntry {
     let date: Date
     let title: String
-    let count: String
-    let formatText: String
-    let colorHex: String
+    let days: String
 }
 
+// РЕДАКТИРУЕМ ТУТ: Красивый дизайн как на скриншоте
 struct WidgetExtensionEntryView : View {
     var entry: Provider.Entry
 
     var body: some View {
-        VStack(spacing: 8) {
-            // Верхнее название счетчика (светлый оттенок выбранного цвета)
+        VStack(spacing: 12) {
+            // Верхний розовый текст
             Text(entry.title)
-                .font(.system(size: 18, weight: .medium, design: .rounded))
-                .foregroundColor(Color(hex: entry.colorHex).opacity(0.6))
+                .font(.system(size: 20, weight: .medium, design: .rounded))
+                .foregroundColor(Color(red: 0.92, green: 0.51, blue: 0.62)) // Нежно-розовый
                 .multilineTextAlignment(.center)
                 .lineLimit(1)
             
-            // Главная цифра по центру (акцентный цвет из настроек)
-            Text(entry.count)
-                .font(.system(size: 54, weight: .bold, design: .rounded))
-                .foregroundColor(Color(hex: entry.colorHex))
+            // Большая малиновая цифра по центру
+            Text(entry.days)
+                .font(.system(size: 58, weight: .bold, design: .rounded))
+                .foregroundColor(Color(red: 0.73, green: 0.05, blue: 0.38)) // Малиновый
                 .lineLimit(1)
             
-            // Формат отображения: часов/дней/недель осталось
-            Text(entry.formatText)
-                .font(.system(size: 16, weight: .regular, design: .rounded))
-                .foregroundColor(Color(hex: entry.colorHex).opacity(0.6))
+            // Нижний текст
+            Text("дней осталось")
+                .font(.system(size: 18, weight: .regular, design: .rounded))
+                .foregroundColor(Color(red: 0.92, green: 0.51, blue: 0.62)) // Нежно-розовый
                 .lineLimit(1)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.white)
+        // Делаем белый фон у самого виджета
+        .background(Color.white) 
     }
 }
 
@@ -73,46 +69,13 @@ struct WidgetExtension: Widget {
         StaticConfiguration(kind: kind, provider: Provider()) { entry in
             if #available(iOS 17.0, *) {
                 WidgetExtensionEntryView(entry: entry)
-                    .containerBackground(.white, for: .widget)
+                    .containerBackground(.white, for: .widget) // Для iOS 17+ фиксируем белый фон
             } else {
                 WidgetExtensionEntryView(entry: entry)
-                    .padding()
             }
         }
-        .configurationDisplayName("Countdown Widget")
-        .description("Виджет с поддержкой тем.")
-        .supportedFamilies([.systemSmall])
+        .configurationDisplayName("My Countdown Widget")
+        .description("Красивый виджет обратного отсчета.")
+        .supportedFamilies([.systemSmall]) // Делаем его маленьким квадратным (1х1)
     }
 }
-
-// Вспомогательное расширение для чтения HEX-цветов во SwiftUI
-extension Color {
-    init(hex: String) {
-        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
-        var int: UInt64 = 0
-        Scanner(string: hex).scanHexInt64(&int)
-        let a, r, g, b: UInt64
-        switch hex.count {
-        case 3: // RGB (12-bit)
-            (a, r, g, b) = (255, (int >> 8 * 17) & 15, (int >> 4 & 15) * 17, (int & 15) * 17)
-        case 6: // RGB (24-bit)
-            (a, r, g, b) = (255, (int >> 16) & 255, (int >> 8) & 255, (int & 255) & 255)
-        case 8: // ARGB (32-bit)
-            (a, r, g, b) = ((int >> 24) & 255, (int >> 16) & 255, (int >> 8) & 255, (int & 255) & 255)
-        default:
-            (a
-
-
-r, g, b) = (255, 186, 13, 97) // Дефолтный малиновый
-        }
-        self.init(
-            .sRGB,
-            red: Double(r) / 255,
-            green: Double(g) / 255,
-            blue: Double(b) / 255,
-            opacity: Double(a) / 255
-        )
-    }
-},
-
-
