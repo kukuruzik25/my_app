@@ -4,6 +4,7 @@ import 'screens/countdown_screen.dart';
 import 'screens/settings_screen.dart';
 import 'models/app_theme.dart';
 import 'services/storage_service.dart';
+import 'package:home_widget/home_widget.dart'; 
 
 void main() {
   runApp(const MyApp());
@@ -37,18 +38,67 @@ class _MyAppState extends State<MyApp> {
       _format = format;
       _loaded = true;
     });
+    _updateWidget();
   }
 
-  void _onThemeChanged(AppThemeColor theme) {
+  void _onThemeChanged(AppThemeColor theme) async {
     setState(() => _theme = theme);
-    _storage.saveTheme(theme);
+    await _storage.saveTheme(theme);
+    _updateWidget(); // Вызываем обновление виджета!
   }
 
-  void _onFormatChanged(DisplayFormat format) {
+  void _onFormatChanged(DisplayFormat format) async {
     setState(() => _format = format);
-    _storage.saveFormat(format);
+    await _storage.saveFormat(format);
+    _updateWidget(); // Вызываем обновление виджета!
   }
+  
+   // Функция-хелпер для обновления виджета
+  Future<void> _updateWidget() async {
+    try {
+      await HomeWidget.setAppGroupId('group.com.example.myCountdownApp');
 
+      // 1. Получаем HEX-код цвета в зависимости от текущей темы
+      String colorHex;
+      switch (_theme) {
+        case AppThemeColor.pink: colorHex = '#BA0D61'; break;
+        case AppThemeColor.blue: colorHex = '#1967D2'; break;
+        case AppThemeColor.purple: colorHex = '#6A1B9A'; break;
+        case AppThemeColor.green: colorHex = '#2E7D32'; break;
+        case AppThemeColor.orange: colorHex = '#EF6C00'; break;
+        default: colorHex = '#BA0D61';
+      }
+
+      // 2. Получаем текст формата
+      String formatText;
+      switch (_format) {
+        case DisplayFormat.days: formatText = 'дней осталось'; break;
+        case DisplayFormat.hours: formatText = 'часов осталось'; break;
+        case DisplayFormat.weeks: formatText = 'недель осталось'; break;
+        default: formatText = 'часов осталось';
+      }
+
+      // 3. Получаем актуальные данные о самом таймере из хранилища
+      // (Вам нужно заменить '_storage.loadTitle()' и '_storage.loadCount()' на реальные методы вашего StorageService, если они там есть)
+      final title = await _storage.loadTitle() ?? 'Тока тока тока';
+      final count = await _storage.loadCount() ?? '380';
+
+      // 4. Сохраняем всё для iOS
+      await HomeWidget.saveWidgetData('widget_title', title);
+      await HomeWidget.saveWidgetData('widget_count', count.toString());
+      await HomeWidget.saveWidgetData('widget_format_text', formatText);
+      await HomeWidget.saveWidgetData('widget_color_hex', colorHex);
+
+      // 5. Обновляем виджет
+      await HomeWidget.updateWidget(
+        name: 'WidgetExtension',
+        iOSName: 'WidgetExtension',
+      );
+    } catch (e) {
+      debugPrint('Ошибка обновления виджета: $e');
+    }
+  }
+  
   @override
   Widget build(BuildContext context) {
     if (!_loaded) {
