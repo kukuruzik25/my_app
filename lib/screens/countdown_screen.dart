@@ -43,7 +43,6 @@ class _CountdownScreenState extends State<CountdownScreen> {
       case AppThemeColor.purple: colorHex = '#6A1B9A'; break;
       case AppThemeColor.green: colorHex = '#2E7D32'; break;
       case AppThemeColor.orange: colorHex = '#EF6C00'; break;
-      default: colorHex = '#BA0D61';
     }
 
      // Сохраняем данные по ключам, которые ждет наш WidgetExtension.swift
@@ -101,7 +100,7 @@ class _CountdownScreenState extends State<CountdownScreen> {
         unitLabel = 'осталось';
         break;
     }
-
+    _updateWidgetData(bigNumber, unitLabel);
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.white,
       child: SafeArea(
