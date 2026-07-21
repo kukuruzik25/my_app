@@ -1,0 +1,5 @@
+scripts:
+  - name: Build iOS App with Widget Extension
+    script: |
+      flutter build ipa --release \
+        --export-options-plist=$HOME/export_options.plist

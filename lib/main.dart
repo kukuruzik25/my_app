@@ -4,13 +4,13 @@ import 'screens/countdown_screen.dart';
 import 'screens/settings_screen.dart';
 import 'models/app_theme.dart';
 import 'services/storage_service.dart';
-import 'package:home_widget/home_widget.dart'; 
 
 void main() {
   runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {
+
   const MyApp({super.key});
 
   @override
@@ -18,6 +18,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+
   final StorageService _storage = StorageService();
   AppThemeColor _theme = AppThemeColor.pink;
   DisplayFormat _format = DisplayFormat.days;
@@ -38,67 +39,18 @@ class _MyAppState extends State<MyApp> {
       _format = format;
       _loaded = true;
     });
-    _updateWidget();
   }
 
-  void _onThemeChanged(AppThemeColor theme) async {
+  void _onThemeChanged(AppThemeColor theme) {
     setState(() => _theme = theme);
-    await _storage.saveTheme(theme);
-    _updateWidget(); // Вызываем обновление виджета!
+    _storage.saveTheme(theme);
   }
 
-  void _onFormatChanged(DisplayFormat format) async {
+  void _onFormatChanged(DisplayFormat format) {
     setState(() => _format = format);
-    await _storage.saveFormat(format);
-    _updateWidget(); // Вызываем обновление виджета!
+    _storage.saveFormat(format);
   }
-  
-   // Функция-хелпер для обновления виджета
-  Future<void> _updateWidget() async {
-    try {
-      await HomeWidget.setAppGroupId('group.com.example.myCountdownApp');
 
-      // 1. Получаем HEX-код цвета в зависимости от текущей темы
-      String colorHex;
-      switch (_theme) {
-        case AppThemeColor.pink: colorHex = '#BA0D61'; break;
-        case AppThemeColor.blue: colorHex = '#1967D2'; break;
-        case AppThemeColor.purple: colorHex = '#6A1B9A'; break;
-        case AppThemeColor.green: colorHex = '#2E7D32'; break;
-        case AppThemeColor.orange: colorHex = '#EF6C00'; break;
-        default: colorHex = '#BA0D61';
-      }
-
-      // 2. Получаем текст формата
-      String formatText;
-      switch (_format) {
-        case DisplayFormat.days: formatText = 'дней осталось'; break;
-        case DisplayFormat.hours: formatText = 'часов осталось'; break;
-        case DisplayFormat.weeks: formatText = 'недель осталось'; break;
-        default: formatText = 'часов осталось';
-      }
-
-      // 3. Получаем актуальные данные о самом таймере из хранилища
-      // (Вам нужно заменить '_storage.loadTitle()' и '_storage.loadCount()' на реальные методы вашего StorageService, если они там есть)
-      final title = await _storage.loadTitle() ?? 'Тока тока тока';
-      final count = await _storage.loadCount() ?? '380';
-
-      // 4. Сохраняем всё для iOS
-      await HomeWidget.saveWidgetData('widget_title', title);
-      await HomeWidget.saveWidgetData('widget_count', count.toString());
-      await HomeWidget.saveWidgetData('widget_format_text', formatText);
-      await HomeWidget.saveWidgetData('widget_color_hex', colorHex);
-
-      // 5. Обновляем виджет
-      await HomeWidget.updateWidget(
-        name: 'WidgetExtension',
-        iOSName: 'WidgetExtension',
-      );
-    } catch (e) {
-      debugPrint('Ошибка обновления виджета: $e');
-    }
-  }
-  
   @override
   Widget build(BuildContext context) {
     if (!_loaded) {
@@ -145,6 +97,7 @@ class _MyAppState extends State<MyApp> {
 }
 
 class _FloatingTabBar extends StatelessWidget {
+
   final int currentIndex;
   final Color accentColor;
   final ValueChanged<int> onTap;
@@ -162,10 +115,10 @@ class _FloatingTabBar extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(40, 0, 40, 28),
       decoration: BoxDecoration(
         color: CupertinoColors.white,
-        borderRadius: BorderRadius.circular(36),
+        borderRadius: BorderRadius.circular(36), // половина высоты = капсула/овал
         boxShadow: [
           BoxShadow(
-            color: CupertinoColors.black.withOpacity(0.10),
+            color: CupertinoColors.black.withValues(alpha: 0.10),
             blurRadius: 24,
             offset: const Offset(0, 10),
           ),
@@ -198,6 +151,7 @@ class _FloatingTabBar extends StatelessWidget {
 }
 
 class _TabButton extends StatelessWidget {
+
   final IconData icon;
   final String label;
   final bool isSelected;
@@ -212,7 +166,7 @@ class _TabButton extends StatelessWidget {
     required this.onTap,
   });
 
-  @override
+ @override
   Widget build(BuildContext context) {
     final color = isSelected ? accentColor : CupertinoColors.systemGrey;
     return GestureDetector(

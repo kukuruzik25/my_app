@@ -18,54 +18,45 @@ class CountdownScreen extends StatefulWidget {
 
 class _CountdownScreenState extends State<CountdownScreen> {
   Timer? _timer;
-  Timer? _widgetUpdateTimer;
 
   @override
-  void initState() {
+   void initState() {
     super.initState();
-    HomeWidget.setAppGroupId('group.com.my_app');
+    // Инициализируем группу, строго как в файлах .entitlements на GitHub
+    HomeWidget.setAppGroupId('group.com.example.myCountdownApp');
     _timer = Timer.periodic(const Duration(seconds: 1), (_) => setState(() {}));
-    _widgetUpdateTimer = Timer.periodic(const Duration(minutes: 1), (_) {
-      _refreshWidgetData();
-    });
-    _refreshWidgetData();
   }
 
   @override
   void dispose() {
     _timer?.cancel();
-    _widgetUpdateTimer?.cancel();
     super.dispose();
   }
 
-  Future<void> _updateWidgetData(String bigNumber, String unitLabel) async {
-    await HomeWidget.saveWidgetData<String>('bigNumber', bigNumber);
-    await HomeWidget.saveWidgetData<String>('unitLabel', unitLabel);
-    await HomeWidget.updateWidget(iOSName: 'CountdownWidget');
-  }
 
-  void _refreshWidgetData() {
-    final now = DateTime.now();
-    final remaining = eventDate.difference(now);
-    String bigNumber;
-    String unitLabel;
-    switch (widget.format) {
-      case DisplayFormat.days:
-        bigNumber = remaining.inDays.toString();
-        unitLabel = 'дней осталось';
-        break;
-      case DisplayFormat.hours:
-        bigNumber = remaining.inHours.toString();
-        unitLabel = 'часов осталось';
-        break;
-      case DisplayFormat.weeksAndDays:
-        final weeks = remaining.inDays ~/ 7;
-        final days = remaining.inDays % 7;
-        bigNumber = '$weeks нед $days дн';
-        unitLabel = 'осталось';
-        break;
+  Future<void> _updateWidgetData(String bigNumber, String unitLabel) async {
+    // Конвертируем текущий enum темы в HEX для Swift-виджета
+    String colorHex;
+    switch (widget.theme) {
+      case AppThemeColor.pink: colorHex = '#BA0D61'; break;
+      case AppThemeColor.blue: colorHex = '#1967D2'; break;
+      case AppThemeColor.purple: colorHex = '#6A1B9A'; break;
+      case AppThemeColor.green: colorHex = '#2E7D32'; break;
+      case AppThemeColor.orange: colorHex = '#EF6C00'; break;
+      default: colorHex = '#BA0D61';
     }
-    _updateWidgetData(bigNumber, unitLabel);
+
+     // Сохраняем данные по ключам, которые ждет наш WidgetExtension.swift
+    await HomeWidget.saveWidgetData<String>('widget_title', eventTitle);
+    await HomeWidget.saveWidgetData<String>('widget_count', bigNumber);
+    await HomeWidget.saveWidgetData<String>('widget_format_text', unitLabel);
+    await HomeWidget.saveWidgetData<String>('widget_color_hex', colorHex);
+
+   // Вызываем обновление нативного iOS таргет-виджета
+  await HomeWidget.updateWidget(
+      name: 'WidgetExtension',
+      iOSName: 'WidgetExtension',
+    );
   }
 
   String _elapsedLabel(Duration elapsed) {
