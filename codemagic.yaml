@@ -1,7 +1,6 @@
 scripts:
-  - name: Build Widget Extension & iOS App
+  - name: Build Widget Extension
     script: |
-      # 1. Принудительно собираем таргет виджета
       cd ios
       xcodebuild -project Runner.xcodeproj \
                  -scheme WidgetExtension \
@@ -11,6 +10,7 @@ scripts:
                  build
       cd ..
 
-      # 2. Собираем и упаковываем итоговое приложение с виджетом
+  - name: Build iOS App
+    script: |
       flutter build ipa --release \
         --export-options-plist=$HOME/export_options.plist
